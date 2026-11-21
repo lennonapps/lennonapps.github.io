@@ -5,6 +5,7 @@
 // in run/ are put there by hand from the releases and checked against the records here, so a page can't offer a file
 // that isn't the one released. Underscore folders are not published (GitHub Pages runs Jekyll, which skips them).
 'use strict';
+require('./lib/destinations').install(); // only the approved places (rule 1.21)
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
