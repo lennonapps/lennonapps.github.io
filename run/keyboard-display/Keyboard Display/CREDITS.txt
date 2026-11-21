@@ -1,0 +1,13 @@
+Keyboard Display
+================
+
+Made by Benjamin Lennon (lennonapps@outlook.com)
+Author and project lead.
+
+With Hillary Lennon
+Hillary helped conceive the idea, shaped and directed what the app needed to achieve, and tested it
+throughout. Thank you, Hillary: this app is what it is because of your ideas and care.
+
+The same credit is in the app (About), at the top of its files, and in its page.
+If the credit in the app is changed, its About box says "This copy has been changed from the original"
+(credit fingerprint 50b36047).

@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="author" content="Benjamin Lennon (lennonapps@outlook.com), with Hillary Lennon">
+<!-- Keyboard Display. Made by Benjamin Lennon (lennonapps@outlook.com), author and project lead, with Hillary Lennon. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyboard Display</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='12' width='60' height='40' rx='7' fill='%231d2733'/%3E%3Cg fill='%23fff'%3E%3Crect x='8' y='18' width='8' height='8' rx='2'/%3E%3Crect x='20' y='18' width='8' height='8' rx='2'/%3E%3Crect x='32' y='18' width='8' height='8' rx='2' fill='%23ffd23f'/%3E%3Crect x='44' y='18' width='12' height='8' rx='2'/%3E%3Crect x='8' y='30' width='14' height='8' rx='2' fill='%23ffd23f'/%3E%3Crect x='26' y='30' width='8' height='8' rx='2'/%3E%3Crect x='38' y='30' width='18' height='8' rx='2'/%3E%3Crect x='16' y='42' width='32' height='5' rx='2'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#eef2f7; --case:#c9d2df; --key:#ffffff; --keyText:#1d2733; --keyEdge:#9aa7b8;
+  --active:#ffd23f; --activeText:#1d2733; --glow:#ffb703; --caption:#1d2733;
+  --stripBg:#ffffff; --ghost:#b9c1cc; --ink:#000000;
+  --glowSize:30; --glowMix:rgba(255,183,3,.85); --glowMix2:rgba(255,183,3,.4); --radius:14;
+  --u:50px; --stripSize:7;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--caption);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+  overflow:hidden;display:flex;flex-direction:column;user-select:none;transition:background .3s}
+
+/* ---------- text strip ---------- */
+#strip{display:none;margin:2vmin 4vw 0;padding:1.4vmin 2.5vmin;background:var(--stripBg);border-radius:1.5vmin;
+  font-size:calc(var(--stripSize)*1vmin);line-height:1.25;text-align:center;white-space:pre-wrap;word-break:break-word;
+  box-shadow:0 .4vmin 1.5vmin rgba(0,0,0,.15);min-height:calc(var(--stripSize)*1.25vmin + 2.8vmin);font-weight:500;letter-spacing:.02em}
+body.has-strip #strip{display:block}
+#strip .g{color:var(--ghost)}
+#strip .i{color:var(--ink)}
+#strip .t{color:#d33;text-decoration:line-through}
+#strip .cur{box-shadow:inset 0 -.09em 0 var(--glow)}
+#strip .cur.end{display:inline-block;width:.5em}
+#strip .sym{font-size:.7em;opacity:.8}
+
+/* ---------- caption ---------- */
+#caption{height:11vmin;display:flex;align-items:center;justify-content:center;gap:1.6vmin;font-size:4.6vmin;font-weight:600;
+  flex-wrap:nowrap;white-space:nowrap;padding:0 2vmin}
+body.no-caption #caption{display:none}
+#caption .chip{background:var(--active);color:var(--activeText);padding:.15em .55em;border-radius:.3em;
+  box-shadow:0 0 .5em var(--glowMix2)}
+#caption .plus{opacity:.6}
+#caption .res{opacity:.85;margin-left:.6em}
+#caption .res b{font-size:1.15em}
+#caption .hint{opacity:.45;font-weight:400}
+
+/* ---------- keyboard ---------- */
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+#kb{position:relative;background:var(--case);padding:calc(var(--u)*.35);border-radius:calc(var(--u)*.3);
+  box-shadow:0 calc(var(--u)*.15) calc(var(--u)*.5) rgba(0,0,0,.25);transition:background .3s}
+#keys{position:relative}
+.key{position:absolute;left:calc(var(--u)*var(--x));top:calc(var(--u)*var(--y));
+  width:calc(var(--u)*var(--w) - var(--u)*.1);height:calc(var(--u)*var(--h) - var(--u)*.1);
+  background:var(--key);color:var(--keyText);border-radius:calc(var(--u)*var(--radius)/100);
+  box-shadow:0 calc(var(--u)*.07) 0 var(--keyEdge),inset 0 0 0 1px var(--keyEdge);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-size:calc(var(--u)*.3);font-weight:600;line-height:1.05;text-align:center;
+  transition:background .1s,color .1s,box-shadow .18s,transform .08s}
+.key.letter{font-size:calc(var(--u)*.46)}
+.key.small{font-size:calc(var(--u)*.22)}
+.key .top,.key .bot{font-size:calc(var(--u)*.3)}
+.key .top{opacity:.75}
+.key.on{background:var(--active);color:var(--activeText);z-index:2;transform:translateY(calc(var(--u)*.05));
+  box-shadow:0 calc(var(--u)*.02) 0 var(--keyEdge),
+    0 0 calc(var(--glowSize)*.35px) var(--glowMix),
+    0 0 calc(var(--glowSize)*1px) var(--glowMix),
+    0 0 calc(var(--glowSize)*2px) var(--glowMix2)}
+.key.pulse{animation:pulse .35s ease-out}
+@keyframes pulse{0%{filter:brightness(1.6)}100%{filter:brightness(1)}}
+.led{position:absolute;top:calc(var(--u)*.1);right:calc(var(--u)*.12);width:calc(var(--u)*.12);height:calc(var(--u)*.12);
+  border-radius:50%;background:var(--keyEdge);opacity:.5}
+.led.lit{background:var(--glow);opacity:1;box-shadow:0 0 calc(var(--u)*.15) var(--glow)}
+
+/* ---------- floating controls ---------- */
+#controls{position:fixed;top:1.2vmin;right:1.2vmin;display:flex;gap:6px;z-index:20;transition:opacity .5s}
+.btn{font:inherit;font-size:14px;border:1px solid rgba(128,128,128,.45);background:rgba(255,255,255,.85);color:#1d2733;
+  border-radius:8px;padding:6px 11px;cursor:pointer;line-height:1.2}
+.btn:hover{background:#fff;border-color:#888}
+.btn.on{background:#1d2733;color:#fff}
+.btn.rec{background:#d62839;color:#fff;border-color:#d62839}
+body.idle #controls,body.idle #seqbar{opacity:.12}
+body.idle{cursor:none}
+
+/* ---------- sequence bar ---------- */
+#seqbar{display:none;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;margin:0 1.2vmin 1.2vmin;
+  background:rgba(255,255,255,.92);color:#1d2733;border-radius:10px;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.2);transition:opacity .5s}
+body.seq-open #seqbar{display:flex}
+#seqbar label{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#seqbar input[type=range]{width:110px}
+#seqbar input[type=text]{font:inherit;padding:5px 8px;border:1px solid #aab;border-radius:6px;width:220px}
+#seqbar select{font:inherit;padding:4px;border-radius:6px;max-width:160px}
+#seqbar .grp{display:flex;align-items:center;gap:6px}
+#seqbar .sep{width:1px;align-self:stretch;background:#ccd}
+#seqStatus{opacity:.7;font-style:italic}
+
+/* ---------- settings panel ---------- */
+#panel{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:#fbfcfe;color:#1d2733;z-index:30;
+  box-shadow:-4px 0 24px rgba(0,0,0,.3);transform:translateX(105%);transition:transform .25s;overflow-y:auto;padding:14px 16px 40px;font-size:14px}
+body.panel-open #panel{transform:none}
+#panel h2{font-size:18px;margin:4px 0 10px;display:flex;justify-content:space-between;align-items:center}
+#panel h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#5a6577;margin:20px 0 8px;border-top:1px solid #e1e5ec;padding-top:14px}
+.presets{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.preset{position:relative;border:2px solid transparent;border-radius:10px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:left}
+.preset.sel{border-color:#2a6df4}
+.preset .mini{display:flex;gap:3px;margin-top:6px}
+.preset .mini span{width:20px;height:16px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.preset .del{position:absolute;top:2px;right:6px;font-weight:700;opacity:.6}
+.preset .del:hover{opacity:1}
+.crow{display:flex;align-items:center;justify-content:space-between;padding:5px 6px;cursor:pointer;border-radius:6px}
+.crow:hover{background:#f0f3f8}
+.crow .sw{width:44px;height:26px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.crow.sel{background:#e7eefc}
+.srow{display:grid;grid-template-columns:130px 1fr 44px;align-items:center;gap:8px;margin:6px 0}
+.trow{display:flex;align-items:center;gap:8px;margin:6px 0}
+.trow input[type=text]{flex:1;font:inherit;padding:5px 8px;border:1px solid #aab;border-radius:6px}
+.help{line-height:1.5;color:#3b4555}
+.help kbd{background:#eef;border:1px solid #ccd;border-radius:4px;padding:0 4px;font-size:12px}
+
+/* ---------- colour wheel ---------- */
+#wheel{padding:10px;margin:4px 0 10px;background:#fff;border:1px solid #d8dde6;border-radius:10px}
+#wheel .wrap{position:relative;width:220px;height:220px;margin:0 auto;touch-action:none;cursor:crosshair}
+#wheel canvas{width:220px;height:220px;display:block}
+#wheel .mark{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:3px solid #fff;
+  box-shadow:0 0 0 1px #000,0 1px 4px rgba(0,0,0,.6);pointer-events:none}
+#wheel .vrow{display:flex;align-items:center;gap:8px;margin-top:10px}
+#wheel .vrow input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:14px;border-radius:7px;outline:none}
+#wheel .vrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:#fff;border:2px solid #333;cursor:pointer}
+#wheel .hexrow{display:flex;align-items:center;gap:8px;margin-top:8px}
+#wheel .hexrow input{font:inherit;font-family:Consolas,monospace;width:100px;padding:4px 6px;border:1px solid #aab;border-radius:6px}
+#wheel .prev{width:40px;height:26px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+#wheel .quick{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+#wheel .quick span{width:22px;height:22px;border-radius:5px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+
+#toast{position:fixed;left:50%;bottom:4vmin;transform:translateX(-50%);background:rgba(20,25,35,.9);color:#fff;
+  padding:10px 18px;border-radius:10px;font-size:15px;z-index:40;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="strip"></div>
+<div id="caption"></div>
+<div id="stage"><div id="kb"><div id="keys"></div></div></div>
+
+<div id="seqbar">
+  <div class="grp">
+    <button class="btn" id="bRec" title="Record the keys you press">● Record</button>
+    <button class="btn" id="bPlay" title="Play / pause the sequence">▶ Play</button>
+    <button class="btn" id="bStop" title="Stop and reset">■ Stop</button>
+    <label><input type="checkbox" id="cLoop"> Loop</label>
+  </div>
+  <div class="sep"></div>
+  <label>Hold <input type="range" id="rHold" min="200" max="4000" step="50"> <span id="vHold"></span></label>
+  <label>Gap <input type="range" id="rGap" min="0" max="3000" step="50"> <span id="vGap"></span></label>
+  <label>End pause <input type="range" id="rEnd" min="0" max="8000" step="250"> <span id="vEnd"></span></label>
+  <div class="sep"></div>
+  <div class="grp">
+    <input type="text" id="tText" placeholder="…or type text to demonstrate" spellcheck="false">
+    <button class="btn" id="bUse">Use text</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp">
+    <select id="sSeq"><option value="">Saved sequences…</option></select>
+    <button class="btn" id="bSeqSave">Save</button>
+    <button class="btn" id="bSeqDel" title="Delete the selected saved sequence">Delete</button>
+    <button class="btn" id="bSeqClear" title="Remove the current sequence">Clear</button>
+  </div>
+  <span id="seqStatus"></span>
+</div>
+
+<div id="controls">
+  <button class="btn" id="bClear" title="Clear the lit keys">Clear</button>
+  <button class="btn" id="bSeq" title="Record / replay sequences">⏺ Sequence</button>
+  <button class="btn" id="bFull" title="Full screen (also captures most browser shortcuts)">⛶ Full screen</button>
+  <button class="btn" id="bSet" title="Themes and settings">⚙ Settings</button>
+<button class="btn" id="bAbout" title="Who made Keyboard Display">ℹ About</button>
+</div>
+
+<div id="panel">
+  <h2>Settings <button class="btn" id="bClose">✕</button></h2>
+
+  <h3>Theme</h3>
+  <div class="presets" id="presets"></div>
+
+  <h3>Colours <span style="text-transform:none;letter-spacing:0;font-weight:400">(click one to open the colour wheel)</span></h3>
+  <div id="colours"></div>
+
+  <h3>Effects</h3>
+  <div class="srow"><span>Glow size</span><input type="range" id="rGlow" min="0" max="80"><span id="vGlow"></span></div>
+  <div class="srow"><span>Glow strength</span><input type="range" id="rGlowA" min="0" max="100"><span id="vGlowA"></span></div>
+  <div class="srow"><span>Key rounding</span><input type="range" id="rRad" min="0" max="50"><span id="vRad"></span></div>
+  <div class="srow"><span>Text strip size</span><input type="range" id="rStrip" min="3" max="16"><span id="vStrip"></span></div>
+
+  <h3>Save this theme</h3>
+  <div class="trow"><input type="text" id="tTheme" placeholder="Theme name" spellcheck="false"><button class="btn" id="bThemeSave">Save</button></div>
+
+  <h3>Layout &amp; behaviour</h3>
+  <div class="trow"><label><input type="checkbox" id="cF"> Function key row</label></div>
+  <div class="trow"><label><input type="checkbox" id="cNav"> Arrows &amp; navigation keys</label></div>
+  <div class="trow"><label><input type="checkbox" id="cNum"> Number pad</label></div>
+  <div class="trow"><label><input type="checkbox" id="cCap"> Caption (e.g. “Shift + S → S”)</label></div>
+  <div class="trow"><label><input type="checkbox" id="cLower"> Lowercase letters on keys</label></div>
+  <div class="trow"><label><input type="checkbox" id="cLive"> Only light keys while held (don’t hold the last combo)</label></div>
+  <div class="trow"><label><input type="checkbox" id="cOpp"> Typed-text demos use the opposite-hand Shift</label></div>
+
+  <h3>Backup / move to another computer</h3>
+  <div class="trow">
+    <button class="btn" id="bExport">Export themes &amp; sequences</button>
+    <button class="btn" id="bImport">Import…</button>
+    <input type="file" id="fImport" accept=".json,application/json" hidden>
+  </div>
+
+  <h3>Help</h3>
+  <div class="help">
+    Press any key or combination. The keys light up and <b>stay lit</b> until the next key is pressed, so students can copy them.<br><br>
+    <b>Sequence:</b> click <kbd>● Record</kbd>, type, then click <kbd>■ Stop recording</kbd>. Or type a phrase into the box and click <kbd>Use text</kbd>. <kbd>▶ Play</kbd> replays it using the hold and gap times. The phrase shows greyed out and is inked in as each key plays. Pressing a key during playback pauses it.<br><br>
+    Windows always keeps some shortcuts for itself (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Del</kbd>, <kbd>Win</kbd>+…, <kbd>Alt</kbd>+<kbd>Tab</kbd>). In <b>Full screen</b>, Chrome/Edge also pass shortcuts such as <kbd>Ctrl</kbd>+<kbd>W</kbd> and <kbd>Ctrl</kbd>+<kbd>T</kbd> to the page. To leave full screen, <b>hold</b> <kbd>Esc</kbd>.<br><br>
+    Settings are remembered by this browser. Use Export to copy themes and sequences to a USB drive or another computer.
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* Made by Benjamin Lennon (lennonapps@outlook.com), author and project lead,
+   with Hillary Lennon.
+   The credit and the About box. The same file in each of the Lennon apps; the About box reads its words from
+   here, so they live inside the program itself. Text only: nothing here sends anything anywhere. */
+(function () {
+  'use strict';
+  var CREDIT = Object.freeze({
+    author: 'Benjamin Lennon',
+    authorEmail: 'lennonapps@outlook.com',
+    authorRole: 'Author and project lead.',
+    collaborator: 'Hillary Lennon',
+    collaboratorEmail: '',
+    thanks: 'Hillary helped conceive the idea, shaped and directed what the app needed to achieve, and tested it throughout. ' +
+      'Thank you, Hillary: this app is what it is because of your ideas and care.',
+  });
+  // The tamper check: a fingerprint of the credit's exact words, recorded when the release was made. If the words are
+  // changed, the fingerprint no longer matches and the About box says this copy has been changed. It only looks;
+  // it sends nothing anywhere. (FNV-1a, 32-bit: a fingerprint, not a lock.)
+  var FINGERPRINT = '50b36047';
+  function fingerprint(c) {
+    var s = [c.author, c.authorEmail, c.authorRole, c.collaborator, c.collaboratorEmail, c.thanks].join('|'), h = 0x811c9dc5;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return ('0000000' + h.toString(16)).slice(-8);
+  }
+  var INTACT = fingerprint(CREDIT) === FINGERPRINT;
+  var LINE = 'Made by ' + CREDIT.author + ' (' + CREDIT.authorEmail + '), author and project lead, with ' +
+    CREDIT.collaborator + '.';
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // The About box. opts: { app: 'Lemon Timer', version: '0.4.0', notices: [{ what, who, licence, file }] }
+  function about(opts) {
+    opts = opts || {};
+    var old = document.getElementById('lennon-about');
+    if (old) old.parentNode.removeChild(old);
+    var notices = (opts.notices || []).map(function (n) {
+      return '<li>' + esc(n.what) + ': ' + esc(n.who) + '. ' + esc(n.licence) + (n.file ? ' (see ' + esc(n.file) + ')' : '') + '.</li>';
+    }).join('');
+    var box = document.createElement('div');
+    box.id = 'lennon-about';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', 'About ' + (opts.app || 'this app'));
+    box.setAttribute('style', 'position:fixed;inset:0;z-index:2147483000;background:rgba(15,20,28,.55);display:flex;align-items:center;justify-content:center;padding:16px;');
+    box.innerHTML =
+      '<div style="background:#fff;color:#1d2733;max-width:520px;width:100%;border-radius:12px;padding:22px 24px;' +
+      'font:15px/1.55 \'Segoe UI\',system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35);max-height:90vh;overflow:auto;text-align:left;">' +
+      '<h2 style="margin:0 0 4px;font-size:20px;">' + esc(opts.app || 'About') + '</h2>' +
+      (opts.version ? '<p style="margin:0 0 14px;color:#5b6b7c;">Version ' + esc(opts.version) + '</p>' : '') +
+      '<p style="margin:0;"><strong>Made by ' + esc(CREDIT.author) + '</strong> &middot; ' + esc(CREDIT.authorEmail) + '</p>' +
+      '<p style="margin:0 0 12px;">' + esc(CREDIT.authorRole) + '</p>' +
+      '<p style="margin:0;"><strong>With ' + esc(CREDIT.collaborator) + '</strong>' + (CREDIT.collaboratorEmail ? ' &middot; ' + esc(CREDIT.collaboratorEmail) : '') + '</p>' +
+      '<p style="margin:0 0 12px;">' + esc(CREDIT.thanks) + '</p>' +
+      (INTACT ? '' : '<p style="margin:12px 0;padding:8px 10px;border-radius:8px;background:#fdecea;color:#8a1c12;"><strong>This copy has been changed from the original.</strong> ' +
+        'The credit above is not the one it was released with.</p>') +
+      (notices ? '<p style="margin:12px 0 4px;"><strong>Open-source parts</strong></p><ul style="margin:0 0 12px;padding-left:20px;">' + notices + '</ul>' : '') +
+      '<p style="margin:16px 0 0;text-align:right;"><button type="button" id="lennon-about-close" ' +
+      'style="font:inherit;padding:6px 18px;border-radius:8px;border:1px solid #9aa7b4;background:#eef2f7;cursor:pointer;">Close</button></p>' +
+      '</div>';
+    function close() { if (box.parentNode) box.parentNode.removeChild(box); document.removeEventListener('keydown', onKey, true); }
+    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    box.addEventListener('click', function (e) { if (e.target === box) close(); });
+    document.addEventListener('keydown', onKey, true);
+    document.body.appendChild(box);
+    var b = document.getElementById('lennon-about-close');
+    b.addEventListener('click', close);
+    b.focus();
+  }
+
+  window.AppCredit = Object.freeze({ CREDIT: CREDIT, LINE: LINE, about: about, intact: INTACT, fingerprint: FINGERPRINT });
+  // the credit on the page itself too (right-click, Inspect)
+  function mark() { if (document.body && !document.body.getAttribute('data-author')) document.body.setAttribute('data-author', LINE); }
+  if (document.body) mark(); else document.addEventListener('DOMContentLoaded', mark);
+})();
+</script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const STORE = 'keyboardDisplay.v1';
+
+/* ================= themes ================= */
+const PRESETS = {
+  'Classroom Light': {bg:'#eef2f7',case:'#c9d2df',key:'#ffffff',keyText:'#1d2733',keyEdge:'#9aa7b8',active:'#ffd23f',activeText:'#1d2733',glow:'#ffb703',caption:'#1d2733',stripBg:'#ffffff',ghost:'#b9c1cc',ink:'#000000',glowSize:30,glowAlpha:85,radius:14},
+  'Neon Night':      {bg:'#0b0f1a',case:'#151b2b',key:'#222a3d',keyText:'#cfd8ff',keyEdge:'#0a0d16',active:'#00e5ff',activeText:'#001018',glow:'#00e5ff',caption:'#e8f7ff',stripBg:'#ffffff',ghost:'#b9c1cc',ink:'#000000',glowSize:40,glowAlpha:90,radius:14},
+  'Chalkboard':      {bg:'#23392e',case:'#1a2b22',key:'#2f4a3c',keyText:'#f2f0e6',keyEdge:'#12201a',active:'#f2f0e6',activeText:'#23392e',glow:'#fffbe0',caption:'#f2f0e6',stripBg:'#2f4a3c',ghost:'#6f8a7c',ink:'#ffffff',glowSize:28,glowAlpha:70,radius:8},
+  'High Contrast':   {bg:'#000000',case:'#000000',key:'#000000',keyText:'#ffffff',keyEdge:'#ffffff',active:'#ffff00',activeText:'#000000',glow:'#ffff00',caption:'#ffffff',stripBg:'#ffffff',ghost:'#999999',ink:'#000000',glowSize:24,glowAlpha:100,radius:6},
+  'Sunset':          {bg:'#2b1331',case:'#3d1a45',key:'#55245e',keyText:'#ffd9c2',keyEdge:'#1e0b22',active:'#ff7a45',activeText:'#2b1331',glow:'#ff4f81',caption:'#ffe3d3',stripBg:'#fff6f0',ghost:'#d8b9c4',ink:'#2b1331',glowSize:40,glowAlpha:85,radius:18},
+  'Ocean':           {bg:'#062a3a',case:'#0b3a4f',key:'#10506b',keyText:'#d5f3ff',keyEdge:'#031820',active:'#4ef0c8',activeText:'#062a3a',glow:'#4ef0c8',caption:'#e0fbff',stripBg:'#f2fbff',ghost:'#a9c3cf',ink:'#062a3a',glowSize:36,glowAlpha:80,radius:16},
+  'Bubblegum':       {bg:'#fff0f7',case:'#ffc9e3',key:'#ffffff',keyText:'#6b2150',keyEdge:'#e79bc1',active:'#b34dff',activeText:'#ffffff',glow:'#d68cff',caption:'#6b2150',stripBg:'#ffffff',ghost:'#e3bfd2',ink:'#3a0f2c',glowSize:34,glowAlpha:80,radius:30},
+  'Matrix':          {bg:'#000000',case:'#031a08',key:'#062b10',keyText:'#3dff6e',keyEdge:'#000000',active:'#3dff6e',activeText:'#001a05',glow:'#3dff6e',caption:'#3dff6e',stripBg:'#031a08',ghost:'#1d5c2c',ink:'#3dff6e',glowSize:40,glowAlpha:90,radius:6},
+};
+const COLOR_FIELDS = [
+  ['bg','Background'],['case','Keyboard case'],['key','Key face'],['keyText','Key letters'],['keyEdge','Key edge / shadow'],
+  ['active','Pressed key'],['activeText','Pressed key letters'],['glow','Glow'],['caption','Caption text'],
+  ['stripBg','Text strip background'],['ghost','Text – not yet typed'],['ink','Text – typed (inked)'],
+];
+
+const DEFAULTS = {
+  presetName:'Classroom Light', theme:{...PRESETS['Classroom Light']},
+  showF:true, showNav:true, showNum:false, showCaption:true, lowercase:false, live:false, oppShift:true, stripSize:7,
+  seq:{hold:900, gap:350, endPause:2500, loop:true},
+  customThemes:{}, sequences:{}, current:null,
+};
+let S = load();
+function load(){
+  let d = {};
+  try { d = JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch(e) {}
+  const s = {...structuredClone(DEFAULTS), ...d};
+  s.theme = {...DEFAULTS.theme, ...(d.theme||{})};
+  s.seq = {...DEFAULTS.seq, ...(d.seq||{})};
+  return s;
+}
+let saveT = 0;
+function save(){ clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e) {} }, 200); }
+
+function hexToRgb(h){ h=h.replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''); }
+function hsvToRgb(h,s,v){ const f=n=>{const k=(n+h/60)%6; return v-v*s*Math.max(0,Math.min(k,4-k,1));}; return [f(5)*255,f(3)*255,f(1)*255]; }
+function rgbToHsv(r,g,b){ r/=255;g/=255;b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn; let h=0;
+  if(d){ if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h*=60; if(h<0) h+=360; }
+  return [h, mx?d/mx:0, mx]; }
+
+function applyTheme(){
+  const t = S.theme, st = document.documentElement.style;
+  for (const [k] of COLOR_FIELDS) st.setProperty('--'+k, t[k]);
+  const [r,g,b] = hexToRgb(t.glow), a = t.glowAlpha/100;
+  st.setProperty('--glowSize', t.glowSize);
+  st.setProperty('--glowMix', `rgba(${r},${g},${b},${a})`);
+  st.setProperty('--glowMix2', `rgba(${r},${g},${b},${a*.45})`);
+  st.setProperty('--radius', t.radius);
+  st.setProperty('--stripSize', S.stripSize);
+}
+
+/* ================= keyboard layout ================= */
+const SYM = {Backquote:['`','~'],Digit1:['1','!'],Digit2:['2','@'],Digit3:['3','#'],Digit4:['4','$'],Digit5:['5','%'],
+  Digit6:['6','^'],Digit7:['7','&'],Digit8:['8','*'],Digit9:['9','('],Digit0:['0',')'],Minus:['-','_'],Equal:['=','+'],
+  BracketLeft:['[','{'],BracketRight:[']','}'],Backslash:['\\','|'],Semicolon:[';',':'],Quote:["'",'"'],
+  Comma:[',','<'],Period:['.','>'],Slash:['/','?']};
+const LABEL = {Escape:'Esc',Backspace:'Backspace',Tab:'Tab ⇥',CapsLock:'Caps Lock',Enter:'Enter ↵',ShiftLeft:'⇧ Shift',ShiftRight:'⇧ Shift',
+  ControlLeft:'Ctrl',ControlRight:'Ctrl',MetaLeft:'Win',MetaRight:'Win',AltLeft:'Alt',AltRight:'Alt',ContextMenu:'☰',Space:'',
+  ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',PrintScreen:'PrtSc',ScrollLock:'ScrLk',Pause:'Pause',
+  Insert:'Ins',Delete:'Del',Home:'Home',End:'End',PageUp:'PgUp',PageDown:'PgDn',NumLock:'Num',NumpadDivide:'/',
+  NumpadMultiply:'*',NumpadSubtract:'−',NumpadAdd:'+',NumpadEnter:'Enter',NumpadDecimal:'.'};
+const NAME = {ShiftLeft:'Shift',ShiftRight:'Shift',ControlLeft:'Ctrl',ControlRight:'Ctrl',AltLeft:'Alt',AltRight:'Alt',
+  MetaLeft:'Windows',MetaRight:'Windows',ContextMenu:'Menu',Space:'Space',Enter:'Enter',Tab:'Tab',CapsLock:'Caps Lock',
+  Backspace:'Backspace',Escape:'Esc',NumpadEnter:'Enter'};
+const MODS = ['ControlLeft','ControlRight','MetaLeft','MetaRight','AltLeft','AltRight','ShiftLeft','ShiftRight'];
+const isMod = c => MODS.includes(c);
+
+let LAYOUT = [], keyEls = {};
+function buildLayout(){
+  const K = []; const add = (code,x,y,w=1,h=1) => K.push({code,x,y,w,h});
+  let top = 0;
+  if (S.showF){
+    add('Escape',0,0);
+    for (let i=1;i<=12;i++) add('F'+i, (i<=4?1+i : i<=8?1.5+i : 2+i), 0);
+    top = 1.25;
+  }
+  const r = n => top+n;
+  add('Backquote',0,r(0)); for (let i=1;i<=10;i++) add('Digit'+(i%10),i,r(0)); add('Minus',11,r(0)); add('Equal',12,r(0)); add('Backspace',13,r(0),2);
+  add('Tab',0,r(1),1.5); [...'QWERTYUIOP'].forEach((c,i)=>add('Key'+c,1.5+i,r(1))); add('BracketLeft',11.5,r(1)); add('BracketRight',12.5,r(1)); add('Backslash',13.5,r(1),1.5);
+  add('CapsLock',0,r(2),1.75); [...'ASDFGHJKL'].forEach((c,i)=>add('Key'+c,1.75+i,r(2))); add('Semicolon',10.75,r(2)); add('Quote',11.75,r(2)); add('Enter',12.75,r(2),2.25);
+  add('ShiftLeft',0,r(3),2.25); [...'ZXCVBNM'].forEach((c,i)=>add('Key'+c,2.25+i,r(3))); add('Comma',9.25,r(3)); add('Period',10.25,r(3)); add('Slash',11.25,r(3)); add('ShiftRight',12.25,r(3),2.75);
+  add('ControlLeft',0,r(4),1.25); add('MetaLeft',1.25,r(4),1.25); add('AltLeft',2.5,r(4),1.25); add('Space',3.75,r(4),6.25);
+  add('AltRight',10,r(4),1.25); add('MetaRight',11.25,r(4),1.25); add('ContextMenu',12.5,r(4),1.25); add('ControlRight',13.75,r(4),1.25);
+  let x = 15.25;
+  if (S.showNav){
+    if (S.showF){ add('PrintScreen',x,0); add('ScrollLock',x+1,0); add('Pause',x+2,0); }
+    add('Insert',x,r(0)); add('Home',x+1,r(0)); add('PageUp',x+2,r(0));
+    add('Delete',x,r(1)); add('End',x+1,r(1)); add('PageDown',x+2,r(1));
+    add('ArrowUp',x+1,r(3)); add('ArrowLeft',x,r(4)); add('ArrowDown',x+1,r(4)); add('ArrowRight',x+2,r(4));
+    x += 3.25;
+  }
+  if (S.showNum){
+    add('NumLock',x,r(0)); add('NumpadDivide',x+1,r(0)); add('NumpadMultiply',x+2,r(0)); add('NumpadSubtract',x+3,r(0));
+    add('Numpad7',x,r(1)); add('Numpad8',x+1,r(1)); add('Numpad9',x+2,r(1)); add('NumpadAdd',x+3,r(1),1,2);
+    add('Numpad4',x,r(2)); add('Numpad5',x+1,r(2)); add('Numpad6',x+2,r(2));
+    add('Numpad1',x,r(3)); add('Numpad2',x+1,r(3)); add('Numpad3',x+2,r(3)); add('NumpadEnter',x+3,r(3),1,2);
+    add('Numpad0',x,r(4),2); add('NumpadDecimal',x+2,r(4));
+    x += 4.25;
+  }
+  LAYOUT = K; LAYOUT.W = x - .25; LAYOUT.H = top + 5;
+}
+function keyFace(code){
+  if (code.startsWith('Key')){ const c = code.slice(3); return {txt: S.lowercase ? c.toLowerCase() : c, cls:'letter'}; }
+  if (SYM[code]) return {top:SYM[code][1], bot:SYM[code][0]};
+  if (/^F\d+$/.test(code)) return {txt:code, cls:'small'};
+  if (/^Numpad\d$/.test(code)) return {txt:code.slice(6)};
+  const t = LABEL[code] ?? code;
+  return {txt:t, cls: t.length>3 ? 'small' : ''};
+}
+function renderKeyboard(){
+  buildLayout();
+  const box = $('keys'); box.innerHTML = ''; keyEls = {};
+  box.style.width = `calc(var(--u) * ${LAYOUT.W} - var(--u) * .1)`;
+  box.style.height = `calc(var(--u) * ${LAYOUT.H} - var(--u) * .1)`;
+  for (const k of LAYOUT){
+    const el = document.createElement('div');
+    const f = keyFace(k.code);
+    el.className = 'key ' + (f.cls||'');
+    el.style.cssText = `--x:${k.x};--y:${k.y};--w:${k.w};--h:${k.h}`;
+    if (f.top){ el.innerHTML = '<span class="top"></span><span class="bot"></span>'; el.firstChild.textContent=f.top; el.lastChild.textContent=f.bot; }
+    else el.textContent = f.txt;
+    if (k.code==='CapsLock' || k.code==='NumLock' || k.code==='ScrollLock'){ const l=document.createElement('i'); l.className='led'; el.appendChild(l); }
+    box.appendChild(el); keyEls[k.code] = el;
+  }
+  const was = [...lit]; lit = new Set(); setLit(was, false);
+  fit();
+}
+function fit(){
+  const r = $('stage').getBoundingClientRect();
+  const u = Math.max(8, Math.min(r.width*.96/(LAYOUT.W+.7), r.height*.94/(LAYOUT.H+.7)));
+  document.documentElement.style.setProperty('--u', u+'px');
+}
+new ResizeObserver(fit).observe($('stage'));
+
+/* ================= display ================= */
+let lit = new Set();
+function setLit(codes, pulse=true){
+  const next = new Set(codes);
+  for (const c of lit) if (!next.has(c) && keyEls[c]) keyEls[c].classList.remove('on','pulse');
+  for (const c of next){
+    const el = keyEls[c]; if (!el) continue;
+    if (pulse && !lit.has(c)){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+    el.classList.add('on');
+  }
+  lit = next;
+}
+function keyName(code){
+  if (NAME[code]) return NAME[code];
+  if (code.startsWith('Key')) return S.lowercase ? code.slice(3).toLowerCase() : code.slice(3);
+  if (SYM[code]) return SYM[code][0];
+  if (code.startsWith('Numpad')) return 'Num ' + (LABEL[code] ?? code.slice(6));
+  return LABEL[code] || code;
+}
+function charName(ch){ return ch===' ' ? 'space' : ch==='\n' ? 'new line' : ch==='\t' ? 'tab' : `“${ch}”`; }
+let capCodes = [], capCh = null;
+function setCaption(codes, ch){
+  capCodes = codes; capCh = ch;
+  const cap = $('caption'); cap.innerHTML = '';
+  if (!codes.length){ cap.innerHTML = '<span class="hint">Press any key…</span>'; return; }
+  const sorted = [...codes].sort((a,b) => (isMod(b)-isMod(a)) || (isMod(a) ? MODS.indexOf(a)-MODS.indexOf(b) : 0));
+  const names = [...new Set(sorted.map(keyName))];
+  names.forEach((n,i) => {
+    if (i){ const p=document.createElement('span'); p.className='plus'; p.textContent='+'; cap.appendChild(p); }
+    const c=document.createElement('span'); c.className='chip'; c.textContent=n; cap.appendChild(c);
+  });
+  if (ch){ const r=document.createElement('span'); r.className='res'; r.innerHTML='→ <b></b>'; r.lastChild.textContent=charName(ch); cap.appendChild(r); }
+}
+function show(codes, ch){ setLit(codes); setCaption(codes, ch); }
+function clearDisplay(){ setLit([]); setCaption([]); }
+
+function updateLeds(e){
+  for (const n of ['CapsLock','NumLock','ScrollLock']){
+    const l = keyEls[n]?.querySelector('.led'); if (l) l.classList.toggle('lit', e.getModifierState(n));
+  }
+}
+
+/* ================= live input ================= */
+const held = new Set();
+function typingInField(e){
+  const t = e.target;
+  return t && ((t.tagName==='INPUT' && /^(text|search|number)$/.test(t.type)) || t.tagName==='TEXTAREA' || t.isContentEditable);
+}
+function printable(e){
+  if ((e.ctrlKey && !e.altKey) || e.metaKey) return null;   // Ctrl+Alt is AltGr, which does type characters
+  if (e.key.length === 1) return e.key;
+  if (e.key === 'Enter') return '\n';
+  if (e.key === 'Tab') return '\t';
+  return null;
+}
+// drop modifiers whose keyup we missed (e.g. released while the window was unfocused)
+function pruneMods(e){
+  const down = {Shift:e.shiftKey, Control:e.ctrlKey, Alt:e.altKey, Meta:e.metaKey};
+  for (const c of [...held]) for (const p in down) if (c.startsWith(p) && !down[p] && c!==e.code) held.delete(c);
+}
+addEventListener('keydown', e => {
+  if (typingInField(e)) return;
+  e.preventDefault();
+  updateLeds(e);
+  if (e.repeat) return;
+  if (player.playing) pausePlayback();
+  pruneMods(e);
+  held.add(e.code);
+  const ch = printable(e);
+  show([...held], ch);
+  if (rec.on) recordStep([...held], ch, e.code==='Backspace');
+}, true);
+addEventListener('keyup', e => {
+  if (typingInField(e)) return;
+  e.preventDefault();
+  updateLeds(e);
+  if (!held.has(e.code)){            // keys that only send keyup (e.g. Print Screen)
+    if (!player.playing) show([e.code], null);
+    return;
+  }
+  held.delete(e.code);
+  if (S.live) setLit([...held], false);
+}, true);
+addEventListener('blur', () => held.clear());
+addEventListener('contextmenu', e => { if (!e.target.closest('#panel,#seqbar')) e.preventDefault(); });
+
+/* ================= sequences ================= */
+// a step = {codes:[...], ch:'a'|null, back:bool}
+let seq = Array.isArray(S.current) ? S.current : [];
+const rec = {on:false, steps:[]};
+const player = {playing:false, paused:false, i:0, text:'', timer:0};
+
+function applyStep(text, st){ return st.back ? text.slice(0,-1) : st.ch ? text + st.ch : text; }
+function finalText(steps){ return steps.reduce(applyStep, ''); }
+
+function recordStep(codes, ch, back){ rec.steps.push({codes, ch, back}); const t = finalText(rec.steps); renderStrip(t, t); }
+// drop "Shift on its own" steps that are immediately followed by Shift + key
+function tidySteps(steps){
+  return steps.filter((s,i) => {
+    const n = steps[i+1];
+    return !(n && s.codes.every(isMod) && s.codes.every(c => n.codes.includes(c)) && n.codes.length > s.codes.length);
+  });
+}
+function startRecording(){
+  stopPlayback(); rec.on = true; rec.steps = []; held.clear(); clearDisplay();
+  document.body.classList.add('has-strip'); renderStrip('', '');
+  status('Recording – type now, then click “Stop recording”.');
+  updateSeqUI();
+}
+function stopRecording(){
+  rec.on = false;
+  if (rec.steps.length){ setSeq(tidySteps(rec.steps)); status(`Recorded ${seq.length} steps.`); }
+  else { status('Nothing recorded.'); updateSeqUI(); renderStripIdle(); }
+}
+function setSeq(steps){
+  stopPlayback(); seq = steps; S.current = steps; save(); renderStripIdle(); updateSeqUI();
+}
+
+/* text → steps */
+const LEFT_HAND = new Set(['Backquote','Digit1','Digit2','Digit3','Digit4','Digit5','KeyQ','KeyW','KeyE','KeyR','KeyT',
+  'KeyA','KeyS','KeyD','KeyF','KeyG','KeyZ','KeyX','KeyC','KeyV','KeyB']);
+const CHARMAP = (() => {
+  const m = {' ':{code:'Space'}, '\n':{code:'Enter'}, '\t':{code:'Tab'}};
+  for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){ m[c.toLowerCase()] = {code:'Key'+c}; m[c] = {code:'Key'+c, shift:true}; }
+  for (const code in SYM){ m[SYM[code][0]] = {code}; m[SYM[code][1]] = {code, shift:true}; }
+  return m;
+})();
+function textToSteps(str){
+  str = str.replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...').replace(/\r/g,'');
+  const steps = [], skipped = new Set();
+  for (const ch of str){
+    const m = CHARMAP[ch]; if (!m){ skipped.add(ch); continue; }
+    const shift = S.oppShift && LEFT_HAND.has(m.code) ? 'ShiftRight' : 'ShiftLeft';
+    steps.push({codes: m.shift ? [shift, m.code] : [m.code], ch});
+  }
+  if (skipped.size) toast('Skipped characters not on the keyboard: ' + [...skipped].join(' '));
+  return steps;
+}
+
+/* text strip: inked = typed and correct, red = typed but later deleted, grey = still to come */
+function esc(c){ return c==='\n' ? '<span class="sym">↵</span>\n' : c==='\t' ? '<span class="sym">⇥</span>' : c.replace(/[&<>]/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[x])); }
+function renderStrip(typed, target){
+  let n = 0; while (n < typed.length && n < target.length && typed[n] === target[n]) n++;
+  let h = '';
+  for (let i=0;i<n;i++) h += `<span class="i">${esc(target[i])}</span>`;
+  for (const c of typed.slice(n)) h += `<span class="t">${esc(c)}</span>`;
+  const rest = target.slice(n);
+  if (rest.length) h += `<span class="g cur">${esc(rest[0])}</span>` + [...rest.slice(1)].map(c=>`<span class="g">${esc(c)}</span>`).join('');
+  else h += '<span class="cur end">​</span>';
+  $('strip').innerHTML = h;
+}
+function renderStripIdle(){
+  document.body.classList.toggle('has-strip', seq.length > 0 || rec.on);
+  renderStrip('', finalText(seq));
+}
+
+/* playback */
+function play(){
+  if (rec.on) stopRecording();
+  if (!seq.length){ toast('Record a sequence or type some text first.'); return; }
+  if (player.paused){ player.paused=false; player.playing=true; updateSeqUI(); nextStep(); return; }
+  player.playing = true; player.i = 0; player.text = '';
+  held.clear(); clearDisplay(); renderStrip('', finalText(seq)); updateSeqUI();
+  player.timer = setTimeout(nextStep, 500);
+}
+function nextStep(){
+  if (!player.playing) return;
+  const target = finalText(seq);
+  if (player.i >= seq.length){
+    setLit([], false);
+    if (!S.seq.loop){ player.playing = false; updateSeqUI(); return; }
+    player.timer = setTimeout(() => {
+      player.i = 0; player.text = ''; clearDisplay(); renderStrip('', target);
+      player.timer = setTimeout(nextStep, Math.max(400, S.seq.gap));
+    }, S.seq.endPause);
+    return;
+  }
+  const st = seq[player.i++];
+  show(st.codes, st.ch);
+  player.text = applyStep(player.text, st);
+  renderStrip(player.text, target);
+  player.timer = setTimeout(() => {
+    if (S.seq.gap > 0) setLit([], false);
+    player.timer = setTimeout(nextStep, S.seq.gap);
+  }, S.seq.hold);
+}
+function pausePlayback(){ clearTimeout(player.timer); player.playing=false; player.paused=true; updateSeqUI(); }
+function stopPlayback(){
+  clearTimeout(player.timer); player.playing=false; player.paused=false; player.i=0; player.text='';
+  if (seq.length) renderStrip('', finalText(seq));
+  updateSeqUI();
+}
+
+/* ================= sequence bar UI ================= */
+function status(t){ $('seqStatus').textContent = t; }
+function updateSeqUI(){
+  $('bRec').textContent = rec.on ? '■ Stop recording' : '● Record';
+  $('bRec').classList.toggle('rec', rec.on);
+  $('bPlay').textContent = player.playing ? '⏸ Pause' : player.paused ? '▶ Resume' : '▶ Play';
+  $('bPlay').classList.toggle('on', player.playing);
+  const sel = $('sSeq'), cur = sel.value;
+  sel.length = 1;
+  for (const n of Object.keys(S.sequences).sort()) sel.add(new Option(n, n));
+  sel.value = S.sequences[cur] ? cur : '';
+}
+function bindRange(id, vid, get, set, fmt){
+  const r = $(id); r.value = get(); $(vid).textContent = fmt(get());
+  r.addEventListener('input', () => { set(+r.value); $(vid).textContent = fmt(+r.value); save(); });
+}
+const secs = v => (v/1000).toFixed(2).replace(/0$/,'') + ' s';
+bindRange('rHold','vHold', ()=>S.seq.hold, v=>S.seq.hold=v, secs);
+bindRange('rGap','vGap', ()=>S.seq.gap, v=>S.seq.gap=v, secs);
+bindRange('rEnd','vEnd', ()=>S.seq.endPause, v=>S.seq.endPause=v, secs);
+$('cLoop').checked = S.seq.loop;
+$('cLoop').addEventListener('change', e => { S.seq.loop = e.target.checked; save(); });
+$('bRec').onclick = () => rec.on ? stopRecording() : startRecording();
+$('bPlay').onclick = () => player.playing ? pausePlayback() : play();
+$('bStop').onclick = () => { if (rec.on) stopRecording(); stopPlayback(); clearDisplay(); };
+$('bUse').onclick = () => {
+  const t = $('tText').value; if (!t.trim()){ toast('Type some text first.'); return; }
+  const steps = textToSteps(t); if (!steps.length) return;
+  setSeq(steps); $('tText').blur(); status(`Ready: ${steps.length} keys.`); play();
+};
+$('tText').addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDefault(); $('bUse').click(); } });
+$('bSeqSave').onclick = () => {
+  if (!seq.length){ toast('Nothing to save yet.'); return; }
+  const def = finalText(seq).trim().slice(0,30) || 'Sequence';
+  const name = prompt('Name for this sequence:', $('sSeq').value || def);
+  if (!name) return;
+  S.sequences[name] = seq; save(); updateSeqUI(); $('sSeq').value = name; toast('Saved “'+name+'”.');
+};
+$('bSeqDel').onclick = () => {
+  const n = $('sSeq').value; if (!n){ toast('Choose a saved sequence first.'); return; }
+  if (!confirm('Delete saved sequence “'+n+'”?')) return;
+  delete S.sequences[n]; save(); updateSeqUI();
+};
+$('bSeqClear').onclick = () => { if (rec.on) rec.on = false; setSeq([]); clearDisplay(); status(''); };
+$('sSeq').addEventListener('change', e => { const n = e.target.value; if (n && S.sequences[n]){ setSeq(S.sequences[n]); status(`Loaded “${n}”.`); } e.target.blur(); });
+
+/* ================= settings panel ================= */
+function renderPresets(){
+  const box = $('presets'); box.innerHTML = '';
+  const all = [...Object.entries(PRESETS).map(([n,t])=>[n,t,false]), ...Object.entries(S.customThemes).map(([n,t])=>[n,t,true])];
+  for (const [name,t,custom] of all){
+    const d = document.createElement('div');
+    d.className = 'preset' + (S.presetName===name ? ' sel' : '');
+    d.style.background = t.bg; d.style.color = t.caption;
+    d.innerHTML = '<div></div><div class="mini"></div>';
+    d.firstChild.textContent = name;
+    for (const c of [t.case,t.key,t.active,t.glow,t.ink]){ const s=document.createElement('span'); s.style.background=c; d.lastChild.appendChild(s); }
+    if (custom){ const x=document.createElement('span'); x.className='del'; x.textContent='×'; x.title='Delete theme';
+      x.onclick = ev => { ev.stopPropagation(); if (confirm('Delete theme “'+name+'”?')){ delete S.customThemes[name]; save(); renderPresets(); } };
+      d.appendChild(x); }
+    d.onclick = () => { S.theme = {...DEFAULTS.theme, ...t}; S.presetName = name; applyTheme(); syncThemeControls(); save(); };
+    box.appendChild(d);
+  }
+}
+let wheelField = null;
+function renderColours(){
+  const box = $('colours'); box.innerHTML = '';
+  for (const [k,label] of COLOR_FIELDS){
+    const row = document.createElement('div'); row.className = 'crow' + (wheelField===k ? ' sel' : ''); row.dataset.k = k;
+    row.innerHTML = '<span></span><span class="sw"></span>';
+    row.firstChild.textContent = label; row.lastChild.style.background = S.theme[k];
+    row.onclick = () => { wheelField = wheelField===k ? null : k; renderColours(); };
+    box.appendChild(row);
+    if (wheelField === k){ box.appendChild(wheel.el); wheel.load(S.theme[k]); }
+  }
+}
+function themeEdited(){ S.presetName = null; applyTheme(); save(); renderPresets(); }
+const EFFECTS = [['rGlow','vGlow','glowSize'],['rGlowA','vGlowA','glowAlpha'],['rRad','vRad','radius']];
+function syncThemeControls(){
+  for (const [id,vid,k] of EFFECTS){ $(id).value = S.theme[k]; $(vid).textContent = S.theme[k]; }
+  renderPresets(); renderColours();
+}
+for (const [id,vid,k] of EFFECTS)
+  $(id).addEventListener('input', () => { S.theme[k] = +$(id).value; $(vid).textContent = $(id).value; themeEdited(); });
+$('rStrip').value = S.stripSize; $('vStrip').textContent = S.stripSize;
+$('rStrip').addEventListener('input', () => { S.stripSize = +$('rStrip').value; $('vStrip').textContent = S.stripSize; applyTheme(); save(); });
+
+$('bThemeSave').onclick = () => {
+  const n = $('tTheme').value.trim(); if (!n){ toast('Give the theme a name.'); return; }
+  if (PRESETS[n]){ toast('That name is a built-in theme – choose another.'); return; }
+  S.customThemes[n] = {...S.theme}; S.presetName = n; $('tTheme').value=''; save(); renderPresets(); toast('Saved theme “'+n+'”.');
+};
+
+/* colour wheel: angle = hue, distance from centre = saturation, slider = brightness */
+const wheel = (() => {
+  const el = document.createElement('div'); el.id = 'wheel';
+  el.innerHTML = `<div class="wrap"><canvas width="440" height="440"></canvas><div class="mark"></div></div>
+    <div class="vrow"><span>Dark</span><input type="range" min="0" max="100"><span>Bright</span></div>
+    <div class="hexrow"><span class="prev"></span><input type="text" spellcheck="false" maxlength="7"><span style="opacity:.6">hex code</span></div>
+    <div class="quick"></div>`;
+  el.addEventListener('click', e => e.stopPropagation());
+  const cv = el.querySelector('canvas'), ctx = cv.getContext('2d'), mark = el.querySelector('.mark'),
+        wrap = el.querySelector('.wrap'), vr = el.querySelector('input[type=range]'), hex = el.querySelector('.hexrow input'),
+        prev = el.querySelector('.prev');
+  let h=0, s=0, v=1, drawnV=-1;
+  const N = cv.width, R = N/2;
+  function draw(){
+    if (drawnV === v) return; drawnV = v;
+    const img = ctx.createImageData(N,N), d = img.data;
+    for (let y=0;y<N;y++) for (let x=0;x<N;x++){
+      const dx=x-R+.5, dy=y-R+.5, r=Math.hypot(dx,dy), o=(y*N+x)*4;
+      if (r > R) continue;
+      const [cr,cg,cb] = hsvToRgb((Math.atan2(dy,dx)*180/Math.PI+360)%360, r/R, v);
+      d[o]=cr; d[o+1]=cg; d[o+2]=cb; d[o+3] = r > R-1.5 ? Math.max(0,(R-r)/1.5)*255 : 255;
+    }
+    ctx.putImageData(img,0,0);
+  }
+  function ui(){
+    draw();
+    const a = h*Math.PI/180;
+    mark.style.left = (110 + Math.cos(a)*s*110)+'px'; mark.style.top = (110 + Math.sin(a)*s*110)+'px';
+    const full = rgbToHex(...hsvToRgb(h,s,1)), cur = rgbToHex(...hsvToRgb(h,s,v));
+    mark.style.background = cur; prev.style.background = cur;
+    vr.style.background = `linear-gradient(90deg,#000,${full})`; vr.value = Math.round(v*100);
+    if (document.activeElement !== hex) hex.value = cur;
+  }
+  function commit(){
+    if (!wheelField) return;
+    const c = rgbToHex(...hsvToRgb(h,s,v));
+    S.theme[wheelField] = c;
+    const sw = document.querySelector(`.crow[data-k="${wheelField}"] .sw`); if (sw) sw.style.background = c;
+    themeEdited();
+  }
+  function setHex(c){ [h,s,v] = rgbToHsv(...hexToRgb(c)); ui(); }
+  function pick(e){
+    const b = wrap.getBoundingClientRect(), dx = e.clientX-b.left-110, dy = e.clientY-b.top-110;
+    h = (Math.atan2(dy,dx)*180/Math.PI+360)%360; s = Math.min(1, Math.hypot(dx,dy)/110);
+    if (v < .08) v = 1;              // picking a hue on a black wheel would do nothing visible
+    ui(); commit();
+  }
+  wrap.addEventListener('pointerdown', e => { wrap.setPointerCapture(e.pointerId); pick(e); });
+  wrap.addEventListener('pointermove', e => { if (wrap.hasPointerCapture(e.pointerId)) pick(e); });
+  vr.addEventListener('input', () => { v = vr.value/100; ui(); commit(); });
+  hex.addEventListener('input', () => { const t = hex.value.trim().replace('#',''); if (/^[0-9a-f]{6}$/i.test(t)){ setHex('#'+t); commit(); } });
+  const q = el.querySelector('.quick');
+  for (const c of ['#000000','#3a3f4a','#808a99','#c9d0da','#ffffff','#e63946','#ff7a45','#ffd23f','#3dff6e','#2a9d8f','#00e5ff','#2a6df4','#7b2ff7','#ff4fa3']){
+    const sp = document.createElement('span'); sp.style.background = c; sp.title = c;
+    sp.onclick = () => { setHex(c); commit(); }; q.appendChild(sp);
+  }
+  return {el, load:setHex};
+})();
+
+function openPanel(o){ document.body.classList.toggle('panel-open', o); if (o){ syncThemeControls(); wake(); } }
+$('bSet').onclick = () => openPanel(!document.body.classList.contains('panel-open'));
+const KD_VERSION = '1.1.1';   // keep in step with VERSION
+$('bAbout').onclick = () => AppCredit.about({ app: 'Keyboard Display', version: KD_VERSION });
+$('bClose').onclick = () => openPanel(false);
+$('stage').addEventListener('pointerdown', () => openPanel(false));
+
+function bindCheck(id, key, after){
+  $(id).checked = S[key];
+  $(id).addEventListener('change', e => { S[key] = e.target.checked; save(); after && after(); });
+}
+bindCheck('cF','showF',renderKeyboard);
+bindCheck('cNav','showNav',renderKeyboard);
+bindCheck('cNum','showNum',renderKeyboard);
+bindCheck('cLower','lowercase',() => { renderKeyboard(); setCaption(capCodes, capCh); });
+bindCheck('cCap','showCaption',() => document.body.classList.toggle('no-caption', !S.showCaption));
+bindCheck('cLive','live');
+bindCheck('cOpp','oppShift');
+
+/* export / import (for moving to another computer or USB) */
+$('bExport').onclick = () => {
+  const data = {app:'keyboard-display', version:1, customThemes:S.customThemes, sequences:S.sequences};
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+  a.download = 'keyboard-display-backup.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$('bImport').onclick = () => $('fImport').click();
+$('fImport').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    Object.assign(S.customThemes, d.customThemes||{}); Object.assign(S.sequences, d.sequences||{});
+    save(); renderPresets(); updateSeqUI();
+    toast(`Imported ${Object.keys(d.customThemes||{}).length} themes and ${Object.keys(d.sequences||{}).length} sequences.`);
+  } catch(err){ toast('That file could not be read.'); }
+  e.target.value = '';
+});
+
+/* ================= top controls ================= */
+$('bClear').onclick = () => { held.clear(); clearDisplay(); };
+$('bSeq').onclick = () => { const o = document.body.classList.toggle('seq-open'); $('bSeq').classList.toggle('on', o); };
+$('bFull').onclick = async () => {
+  try {
+    if (document.fullscreenElement){ await document.exitFullscreen(); return; }
+    await document.documentElement.requestFullscreen();
+    if (navigator.keyboard && navigator.keyboard.lock){ await navigator.keyboard.lock(); toast('Full screen – hold Esc to exit.'); }
+  } catch(e) {}
+};
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && navigator.keyboard?.unlock) navigator.keyboard.unlock(); });
+// buttons must not keep focus, or Space/Enter would "click" them
+document.addEventListener('click', e => { const b = e.target.closest('button,input[type=checkbox]'); if (b) setTimeout(() => b.blur(), 0); });
+
+let idleT = 0;
+function wake(){
+  document.body.classList.remove('idle'); clearTimeout(idleT);
+  idleT = setTimeout(() => { if (!document.body.classList.contains('panel-open')) document.body.classList.add('idle'); }, 3000);
+}
+addEventListener('mousemove', wake); addEventListener('pointerdown', wake);
+
+let toastT = 0;
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2800); }
+
+/* ================= start ================= */
+applyTheme();
+document.body.classList.toggle('no-caption', !S.showCaption);
+renderKeyboard();
+setCaption([]);
+updateSeqUI();
+renderStripIdle();
+wake();
+// keyboard-display.html#text=Hello%20World  → opens with that text loaded and playing
+(() => {
+  const m = location.hash.match(/text=([^&]*)/);
+  if (m){ document.body.classList.add('seq-open'); $('bSeq').classList.add('on'); $('tText').value = decodeURIComponent(m[1]); $('bUse').click(); }
+})();
+</script>
+</body>
+</html>

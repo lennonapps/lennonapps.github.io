@@ -1,0 +1,31 @@
+Lemon Timer 0.4.1: SHA-256 fingerprints of the released files
+Released by Benjamin Lennon (lennonapps@outlook.com), with Hillary Lennon.
+
+Check any copy on Windows: PowerShell  Get-FileHash "<file>"   or   Command Prompt  certutil -hashfile "<file>" SHA256
+A copy whose fingerprint differs from this list is not the file that was released.
+
+The zip:
+3aeb84a42cfe06e3229fc72ae0a8ece134442203721eccd92c743acd63d109c8  LemonTimer-v0.4.1.zip
+
+Every file inside it (in the "Lemon Timer" folder):
+1c4908feef2d0026ecd4395a977cf3ace316448df3dbc68662a888c6056c54ae  CREDITS.txt
+5ace4dfdcc9fd476c6cf4b524f151ba2c278ffc32f345e5d82602b0b1b93f366  Start Lemon Timer.cmd
+a4b20e9fb6dce62cd603e8eaebff12e2fef8198d69575ba06c39ac7f6b45660b  Start in browser.html
+b02d5616566967b2988b8099ca4289fb5fa1753bb9874b598b422f6bf46d5431  System/VERSION.txt
+7531e9ac912951158b69778177789c0906f89bda5ed7b9c1fff369b09210a981  System/app/index.html
+e3ff4ed68e63889f9ebb9ba823c5af77961634075e8393f81078ba0d8a60be2a  System/app/js/app.js
+d78d615325b42f4fde739d74b23e061fa50d4c80bc472a68a1d2d391a35afca8  System/app/js/character.js
+e2039a82d518bb6a312c335329893cdc00c54396a81bc7bc06eed5a9726d223f  System/app/js/chooser.js
+be78de9013c85d297f723824734a6ae0943158f0ff2a012254bcce21d26ad0e4  System/app/js/credit.js
+301ce2155d1660940b2fd89aa447ada63c63d6e2373ba373311264da6224ea58  System/app/js/hw/geometry.js
+2a9f176fdab33f68e7df08d2302e5e3e1c1d1767874ed63e8e78b4343e89b2e6  System/app/js/hw/nsw-foundation-cursive-ofl.js
+9a25c52a1e86483fee20767ea9289b2490fbddc29eb82733b0ffa15f837e539f  System/app/js/hw/shaper.js
+6cc28a748587f86df84c3ca52d1b3c819733ccc2330bb7b48b9e0f21a0bc686b  System/app/js/hw/typesetter.js
+02fdd65ac6ddf9ed91cc7840663bf5bd338bf69bfd5bd6583ffec83fd2304627  System/app/js/scene.js
+c30598659726c5041d58d91fd4e92d7d0aa95ef5b2014b1c27704b6433e57da2  System/app/js/sound.js
+478a44bf1beed54770d2ccc087a8776c0a4cdfc19291ec6b639a9e5a394633c2  System/app/js/timeline.js
+e7810bde16b11b17c345996c9440465fb77036f95d1bd6d5b526a33439766c8a  System/app/js/version.js
+23b836fa94337f1592643b4fb4ea63b9c8c9a3405faf1919c76f8c9fc148cb7b  System/app/lemon.ico
+19ae972b642629838f69db1b74e5c2d9fdf218cb2e1362802800ae6b16ccf21d  System/app/licenses/NOTICE.txt
+99b7dc3368e04d256f5428105c86ebcd3bf1b1af0f65860aeb638b116f5a25d1  System/app/licenses/OFL.txt
+e21e9e9493a5f895ac57190f82877b90e982fe489f2b7bb603b0844392592971  Teacher guide.html

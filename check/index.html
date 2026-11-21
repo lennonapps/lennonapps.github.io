@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check a copy · Lennon Apps</title>
+<meta name="description" content="Check that a copy of a Lennon Apps app is exactly the one released.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../img/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#1f6f78"/><circle cx="11" cy="12" r="4.2" fill="#f2c230"/><circle cx="21.5" cy="12" r="4.2" fill="#8fb6ff"/><circle cx="16.2" cy="21.5" r="4.2" fill="#f29ac9"/></svg><span>Lennon Apps</span></a>
+<nav><a href="../">Apps</a><a href="../check/" aria-current="page">Check a copy</a><a href="../terms/">Terms and privacy</a></nav>
+</div></header>
+<main>
+<div class="wrap narrow">
+<section class="hero" style="padding-bottom:0">
+<h1>Check a copy</h1>
+<p class="lead">Drop a zip, an app folder or any file from one, and this page tells you whether it is exactly what we released.</p>
+<p class="muted">Your browser works out each file's fingerprint on your own computer and compares it with the published list. Nothing is uploaded.</p>
+</section>
+<div class="drop" id="drop">
+<h3>Drop it here</h3>
+<p>A downloaded zip, a whole app folder, or single files</p>
+<div class="pick">
+<label class="btn primary">Choose a zip or files<input type="file" id="files" multiple></label>
+<label class="btn">Choose a folder<input type="file" id="folder" webkitdirectory multiple></label>
+</div>
+</div>
+<div id="out" aria-live="polite"></div>
+<h2>Prefer to check it yourself?</h2>
+<p>In PowerShell: <code>Get-FileHash "the file"</code>. In Command Prompt: <code>certutil -hashfile "the file" SHA256</code>. Then compare the result with the list on the app's page.</p>
+</div>
+</main>
+<footer><div class="wrap">
+<span>Made by Benjamin and Hillary Lennon in our own time. Free for education. Please keep the credit.</span>
+<span><a href="mailto:contact@lennonapps.com">contact@lennonapps.com</a> · <a href="../terms/">Terms and privacy</a></span>
+</div></footer>
+<script src="../sums.js"></script>
+<script src="../check.js"></script>
+</body>
+</html>

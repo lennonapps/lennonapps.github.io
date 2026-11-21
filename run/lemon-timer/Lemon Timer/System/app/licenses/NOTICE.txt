@@ -1,0 +1,12 @@
+Lemon Timer - third-party notices
+=================================
+
+Handwriting stroke data (js/hw/nsw-foundation-cursive-ofl.js)
+-------------------------------------------------------------
+The pen-path data is derived from the font Edu NSW ACT Cursive (version 2.000, release v1.000),
+Copyright 2023 The NSW ACT School Hand Australia Project Authors
+(https://github.com/SorkinType/NSWACTSchoolHandAustralia).
+
+The font is licensed under the SIL Open Font License, Version 1.1 (see OFL.txt). The stroke data
+is a Modified Version of that Font Software and is likewise distributed under the SIL Open Font
+License 1.1. It is not sold on its own.

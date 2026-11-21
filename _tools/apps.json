@@ -1,0 +1,62 @@
+[
+  {
+    "id": "lemon-timer",
+    "name": "Lemon Timer",
+    "status": "live",
+    "record": "LemonTimer-v0.4.1",
+    "version": "0.4.1",
+    "folder": "Lemon Timer",
+    "start": "Start Lemon Timer.cmd",
+    "image": "img/lemon-timer.png",
+    "accent": "#e9b500",
+    "tagline": "A classroom timer where every minute is a lemon.",
+    "about": [
+      "A cartoon teacher sits at her desk with a row of lemons. Every lemon is one minute: at the start of each minute she takes a lemon and eats it, bite by sour bite.",
+      "When the time is up she walks to the chalkboard and writes your message in NSW Foundation cursive, fetching her step stool for a longer one."
+    ],
+    "features": [
+      "Timers from a minute to hours: longer ones bring out crates of lemons",
+      "Pause, reset, and +1 minute even while it runs",
+      "Your message on the board, on one to three lines",
+      "Full screen for the class; the buttons fade away",
+      "Saved timers for the ones you use every day",
+      "Sound on or off"
+    ]
+  },
+  {
+    "id": "keyboard-display",
+    "name": "Keyboard Display",
+    "status": "live",
+    "record": "KeyboardDisplay-v1.1.1",
+    "version": "1.1.1",
+    "folder": "Keyboard Display",
+    "start": "Start Keyboard Display.cmd",
+    "image": "img/keyboard-display.png",
+    "accent": "#3b6fd8",
+    "tagline": "A big on-screen keyboard that lights up as you type.",
+    "about": [
+      "Shows a large keyboard on the board. Each key you press lights up and stays lit until the next press, so students can find the same key on their own keyboards.",
+      "Shortcuts are spelt out above the keyboard: press Shift + S and it reads Shift + S, then the letter it makes."
+    ],
+    "features": [
+      "Every key and shortcut lights up as you press it",
+      "Eight themes, and any colour you like for keys, letters and glow",
+      "Record a word or sentence and replay it slowly for the class",
+      "Full screen for the class; the buttons fade away"
+    ]
+  },
+  {
+    "id": "handwriting-worksheets",
+    "name": "Handwriting Worksheets",
+    "status": "soon",
+    "accent": "#2f7d5b",
+    "tagline": "Print-ready handwriting practice sheets from any text, in NSW Foundation-style print, precursive or cursive."
+  },
+  {
+    "id": "fizzlets",
+    "name": "Fizzlets",
+    "status": "soon",
+    "accent": "#c2569b",
+    "tagline": "A class pet game for teams: each house hatches and raises little creatures, and builds its own stable."
+  }
+]

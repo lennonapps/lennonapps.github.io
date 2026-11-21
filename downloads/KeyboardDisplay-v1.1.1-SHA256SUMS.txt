@@ -1,0 +1,16 @@
+Keyboard Display 1.1.1: SHA-256 fingerprints of the released files
+Released by Benjamin Lennon (lennonapps@outlook.com), with Hillary Lennon.
+
+Check any copy on Windows: PowerShell  Get-FileHash "<file>"   or   Command Prompt  certutil -hashfile "<file>" SHA256
+A copy whose fingerprint differs from this list is not the file that was released.
+
+The zip:
+4219096f37ec7630cca56419df4a2a2cdaae11b834ff675565e49bea63921bf6  KeyboardDisplay-v1.1.1.zip
+
+Every file inside it (in the "Keyboard Display" folder):
+690efdcd9e3bf85fd445cc2fcd27ab76d4b582b7e8ed10811bb213d9458d259b  CREDITS.txt
+29d00517cb56149cba96312a7bf2ad105163fb9897490110bb419b34e9417aff  Start Keyboard Display.cmd
+dbf23c4619d9f5b028b0ef60bc1fe231edbec1b461211d711fbaa1d2bfd9dead  Start in browser.html
+ab84465ea7f9f47f8025bff6a578447d3b215c716455fc08dfe000023af9acbe  System/VERSION.txt
+53d34004baa0c5933e73576ffa14d9a62bd61c1b9dcfa452aeb45814bd571019  System/app/index.html
+9d84a1f87f85b173ce6b0679d5dc57ed4558dbbb8222223509f03a329925be56  Teacher guide.html
