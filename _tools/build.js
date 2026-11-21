@@ -212,6 +212,6 @@ const sums = { about: 'Every fingerprint published on lennonapps.com, for Check 
   apps: live.map((a) => ({ id: a.id, name: a.name, version: a.version, folder: a.folder, page: a.id + '/', zip: a.rec.zip, files: a.rec.files })) };
 write('sums.json', JSON.stringify(sums, null, 1) + '\n');
 write('sums.js', 'window.LENNON_SUMS = ' + JSON.stringify(sums) + ';\n');
-write('CNAME', 'lennonapps.com\n');
+write('CNAME', 'lennonapps.com');   // exactly as GitHub writes it (no line break), so a rebuild and GitHub's settings never disagree
 write('img/icon.svg', LOGO.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ') + '\n');
 console.log('Built ' + (live.length + 4) + ' pages for ' + live.map((a) => a.name + ' ' + a.version).join(', ') + '.');
