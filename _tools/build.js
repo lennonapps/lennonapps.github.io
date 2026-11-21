@@ -70,7 +70,7 @@ function page({ depth, title, description, current, body, script }) {
 ${body}
 </main>
 <footer><div class="wrap">
-<span>Made by Benjamin and Hillary Lennon in our own time. Free for education. Please keep the credit.</span>
+<span>Made by Benjamin and Hillary Lennon. Free for education. Please keep the credit.</span>
 <span><a href="mailto:${CONTACT}">${CONTACT}</a> · <a href="${up}terms/">Terms and privacy</a></span>
 </div></footer>
 ${[].concat(script || []).map((s) => `<script src="${up}${s}"></script>\n`).join('')}</body>
@@ -86,7 +86,7 @@ const card = (a) => a.status === 'live'
 write('index.html', page({ depth: 0, current: '', title: 'Lennon Apps: little classroom apps', description: 'Free little classroom apps for teachers: run from a flash drive, no install, no internet, nothing tracked.',
   body: `<section class="hero"><div class="wrap">
 <h1>Little classroom apps</h1>
-<p class="lead">Hi! We're Benjamin and Hillary Lennon. These little classroom apps are a hobby project we made in our own time, and we'd love you to use them.</p>
+<p class="lead">Hi! We're Benjamin and Hillary Lennon. We make little classroom apps together, just for the fun of it, and we'd love you to use them.</p>
 <p class="sign">Free for education. Please keep the credit. Questions: <a href="mailto:${CONTACT}">${CONTACT}</a></p>
 <ul class="pills"><li>Runs from a flash drive</li><li>Nothing to install</li><li>Works offline</li><li>No accounts, no tracking</li><li>Open code you can read</li></ul>
 </div></section>
